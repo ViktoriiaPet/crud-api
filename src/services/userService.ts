@@ -1,6 +1,19 @@
 import {type User } from "../models/User.js";
 let users: User[] = []
 
+users = [
+    {   
+        id:1,
+        name: "kate",
+        email: "non@non.no"
+    },
+        {   
+        id:2,
+        name: "maria",
+        email: "nona@non.no"
+    }
+]
+
 export const getAllUser = ():User[] => {
     return users
 }

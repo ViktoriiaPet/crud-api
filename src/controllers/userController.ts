@@ -3,7 +3,7 @@
  import { type User } from '../models/User.js';
 
 export const getUsers = (req: Request, res: Response) => {
-    const users = userservice.getAllUser;
+    const users = userservice.getAllUser();
     res.json(users)
 }
 
