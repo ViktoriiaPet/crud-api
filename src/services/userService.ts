@@ -1,42 +1,28 @@
 import {type User } from "../models/User.js";
-let users: User[] = []
+import { pool } from "../config/db.js";
 
-users = [
-    {   
-        id:1,
-        name: "kate",
-        email: "non@non.no"
-    },
-        {   
-        id:2,
-        name: "maria",
-        email: "nona@non.no"
-    }
-]
-
-export const getAllUser = ():User[] => {
-    return users
+export const getAllUser = async (): Promise<User[]> => {
+    const result = await pool.query('SELECT * FROM users');
+    return result.rows;
 }
 
-export const getUserById = (id:number) : User | undefined => {
-    return users.find(u => u.id === id)
+export const getUserById = async (id:number) : Promise<User | undefined> => {
+   const result = await pool.query('SELECT * FROM users WHERE id = $1',
+    [id])
+   return result.rows[0];
 }
 
-export const createUser = (user:User) : User => {
-    users.push(user);
-    return user
+export const createUser = async (user:User) : Promise<User | undefined> => {
+    const result = await pool.query('INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', [user.name, user.email])
+    return result.rows[0];
 }
 
-export const updateUser = (id:number, updateUser: Partial<User>): User | undefined => {
-    const user = users.find(u => u.id === id);
-    if (!user) return undefined;
-    Object.assign(user, updateUser);
-    return user 
+export const updateUser = async (id:number, updateUser: Partial<User>): Promise<User | undefined> => {
+    const result = await pool.query('UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *', [updateUser.name, updateUser.email, id])
+    return result.rows[0]
 }
 
-export const deleteUser = (id:number): boolean  => {
-    const index = users.findIndex (u => u.id === id)
-    if (index === -1) return false;
-    users.splice(index, 1)
-    return true
+export const deleteUser = async (id:number): Promise<boolean>  => {
+    const result = await pool.query('DELETE FROM users WHERE id = $1', [id])
+    return (result.rowCount ?? 0) > 0;
 }
