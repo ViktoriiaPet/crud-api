@@ -1,15 +1,33 @@
-import {type Request, type Response, type NextFunction } from "express";
+import { type Request, type Response, type NextFunction } from "express";
+import type { ZodSchema } from "zod";
 
-export const validateUser = (req: Request, res: Response, next: NextFunction) => {
-  const { name, email } = req.body;
+export const validateUser = (schema: ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.body);
 
-  if (!name) {
-    return res.status(400).json({ message: 'Name is required' });
-  }
+    if (!result.success) {
+      const formatted = result.error.format();
+      const errors: Record<string, string> = {};
 
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
-  }
+      for (const key of Object.keys(formatted)) {
+        const field = formatted[key];
 
-  next();
+        if (
+          typeof field === "object" &&
+          field !== null &&
+          "_errors" in field &&
+          Array.isArray(field._errors) &&
+          field._errors.length > 0
+        ) {
+          errors[key] = field._errors[0];
+        }
+      }
+
+      res.status(400).json({ errors });
+      return;
+    }
+
+    req.body = result.data;
+    next();
+  };
 };
