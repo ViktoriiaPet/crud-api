@@ -1,9 +1,18 @@
 import {type User } from "../models/User.js";
 import { pool } from "../config/db.js";
 
-export const getAllUser = async (): Promise<User[]> => {
-    const result = await pool.query('SELECT * FROM users');
-    return result.rows;
+
+export const getAllUser = async (offset:number, limit: number): Promise< { data: User[]; total: number; totalPages: number }> => {
+    const result = await pool.query('SELECT * FROM users ORDER BY id ASC LIMIT $1 OFFSET $2', [limit, offset]);
+    const countResult = await pool.query('SELECT COUNT(*) FROM users')
+    const total = parseInt(countResult.rows[0].count, 10);
+    const totalPages = Math.ceil(total / limit);
+    
+    return {
+    data: result.rows,
+    total,
+    totalPages
+};;
 }
 
 export const getUserById = async (id:number) : Promise<User | undefined> => {

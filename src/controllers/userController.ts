@@ -1,10 +1,23 @@
  import express, { type Request, type Response } from 'express';
  import * as userservice from "../services/userService.js"
  import { type User } from '../models/User.js';
+ import { paginationEschema } from '../schemas/pagingSchema.js';
+import { number } from 'zod';
 
 export const getUsers = async (req: Request, res: Response) => {
-    const users = await userservice.getAllUser();
-    res.json(users)
+    const {page, limit} = paginationEschema.parse(req.query);
+    const offset = (page - 1) * limit;
+
+    const {data, total, totalPages } = await userservice.getAllUser(offset, limit);
+    res.json({
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    });
 }
 
 export const getUser = async (req: Request, res: Response) => {
