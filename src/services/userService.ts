@@ -30,14 +30,38 @@ export const getUserById = async (id:number) : Promise<User | undefined> => {
 }
 
 export const createUser = async (user:User) : Promise<User | undefined> => {
-    const result = await pool.query('INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', [user.name, user.email])
+    console.log("3 service start");
+    const result = await pool.query('INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *', [user.name, user.email, user.password])
     return result.rows[0];
 }
 
-export const updateUser = async (id:number, updateUser: Partial<User>): Promise<User | undefined> => {
-    const result = await pool.query('UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *', [updateUser.name, updateUser.email, id])
-    return result.rows[0]
-}
+export const updateUser = async (
+  id: number,
+  updateUser: Partial<User>
+): Promise<User | undefined> => {
+  const fields: string[] = [];
+  const values: (string | number)[] = [];
+  let index = 1;
+
+  if (updateUser.name !== undefined) {
+    fields.push(`name = $${index++}`);
+    values.push(updateUser.name);
+  }
+
+  if (updateUser.email !== undefined) {
+    fields.push(`email = $${index++}`);
+    values.push(updateUser.email);
+  }
+
+  values.push(id);
+
+  const result = await pool.query(
+    `UPDATE users SET ${fields.join(", ")} WHERE id = $${index} RETURNING *`,
+    values
+  );
+
+  return result.rows[0];
+};
 
 export const deleteUser = async (id:number): Promise<boolean>  => {
     const result = await pool.query('DELETE FROM users WHERE id = $1', [id])
