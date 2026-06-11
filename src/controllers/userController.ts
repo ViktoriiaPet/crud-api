@@ -5,15 +5,22 @@
 import { number } from 'zod';
 
 export const getUsers = async (req: Request, res: Response) => {
-    const {page, limit} = paginationEschema.parse(req.query);
-    const offset = (page - 1) * limit;
+    const query  = paginationEschema.parse(req.query);
+    const offset = (query.page - 1) * query.limit;
 
-    const {data, total, totalPages } = await userservice.getAllUser(offset, limit);
+    const {data, total, totalPages } = await userservice.getAllUser({
+  offset,
+  limit: query.limit,
+  email: query.email,
+  name: query.name,
+  sortBy: query.sortBy,
+  order: query.order
+});
     res.json({
       data,
       meta: {
-        page,
-        limit,
+       page: query.page,
+       limit: query.limit,
         total,
         totalPages,
       },

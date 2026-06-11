@@ -2,17 +2,25 @@ import {type User } from "../models/User.js";
 import { pool } from "../config/db.js";
 
 
-export const getAllUser = async (offset:number, limit: number): Promise< { data: User[]; total: number; totalPages: number }> => {
-    const result = await pool.query('SELECT * FROM users ORDER BY id ASC LIMIT $1 OFFSET $2', [limit, offset]);
+export const getAllUser = async (params: {
+  offset: number;
+  limit: number;
+  email: string | undefined;
+  name: string | undefined;
+  sortBy: "id" | "name" | "email";
+  order: "asc" | "desc";
+}): Promise< { data: User[]; total: number; totalPages: number }> => {
+
+    const result = await pool.query('SELECT * FROM users ORDER BY id ASC LIMIT $1 OFFSET $2', [params.limit, params.offset]);
     const countResult = await pool.query('SELECT COUNT(*) FROM users')
     const total = parseInt(countResult.rows[0].count, 10);
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / params.limit);
     
     return {
     data: result.rows,
     total,
     totalPages
-};;
+};
 }
 
 export const getUserById = async (id:number) : Promise<User | undefined> => {
