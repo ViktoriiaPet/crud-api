@@ -17,4 +17,6 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.users
     OWNER to postgres;
 
+ALTER TABLE users
+ADD COLUMN is_active BOOLEAN DEFAULT true;
     
