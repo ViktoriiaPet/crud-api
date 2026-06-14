@@ -38,10 +38,12 @@ export const createUser = async (user:User) : Promise<User | undefined> => {
 export const updateUser = async (
   id: number,
   updateUser: Partial<User>
-): Promise<User | undefined> => {
+): Promise<User | undefined > => {
   const fields: string[] = [];
   const values: (string | number)[] = [];
   let index = 1;
+
+ 
 
   if (updateUser.name !== undefined) {
     fields.push(`name = $${index++}`);
@@ -55,8 +57,12 @@ export const updateUser = async (
 
   values.push(id);
 
+if (fields.length === 0) {
+  throw new Error("No fields to update");
+}
+
   const result = await pool.query(
-    `UPDATE users SET ${fields.join(", ")} WHERE id = $${index} RETURNING *`,
+    `UPDATE users SET ${fields.join(", ")}, updated_at = NOW() WHERE id = $${index} RETURNING *`,
     values
   );
 
@@ -64,6 +70,6 @@ export const updateUser = async (
 };
 
 export const deleteUser = async (id:number): Promise<boolean>  => {
-    const result = await pool.query('DELETE FROM users WHERE id = $1', [id])
+    const result = await pool.query('UPDATE users SET is_active = false , updated_at = NOW() WHERE id = $1', [id])
     return (result.rowCount ?? 0) > 0;
 }
