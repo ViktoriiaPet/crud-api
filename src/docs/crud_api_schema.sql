@@ -19,4 +19,7 @@ ALTER TABLE IF EXISTS public.users
 
 ALTER TABLE users
 ADD COLUMN is_active BOOLEAN DEFAULT true;
+
+ALTER TABLE users
+ADD CONSTRAINT users_email_unique UNIQUE(email);
     
