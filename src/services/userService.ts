@@ -11,7 +11,7 @@ export const getAllUser = async (params: {
   order: "asc" | "desc";
 }): Promise< { data: User[]; total: number; totalPages: number }> => {
 
-    const result = await pool.query('SELECT * FROM users ORDER BY id ASC LIMIT $1 OFFSET $2', [params.limit, params.offset]);
+    const result = await pool.query('SELECT id, name, email, role, created_at, updated_at FROM users WHERE is_active = true ORDER BY id ASC LIMIT $1 OFFSET $2', [params.limit, params.offset]);
     const countResult = await pool.query('SELECT COUNT(*) FROM users')
     const total = parseInt(countResult.rows[0].count, 10);
     const totalPages = Math.ceil(total / params.limit);
@@ -24,22 +24,52 @@ export const getAllUser = async (params: {
 }
 
 export const getUserById = async (id:number) : Promise<User | undefined> => {
-   const result = await pool.query('SELECT * FROM users WHERE id = $1',
+   const result = await pool.query('SELECT id, name, email, role, created_at, updated_at FROM users WHERE is_active = true AND id = $1',
     [id])
    return result.rows[0];
 }
 
 export const createUser = async (user:User) : Promise<User | undefined> => {
-    const result = await pool.query('INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', [user.name, user.email])
+    console.log(user);
+    const result = await pool.query('INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at, updated_at', [user.name, user.email, user.password, user.role])
     return result.rows[0];
 }
 
-export const updateUser = async (id:number, updateUser: Partial<User>): Promise<User | undefined> => {
-    const result = await pool.query('UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *', [updateUser.name, updateUser.email, id])
-    return result.rows[0]
+export const updateUser = async (
+  id: number,
+  updateUser: Partial<User>
+): Promise<User | undefined > => {
+  const fields: string[] = [];
+  const values: (string | number)[] = [];
+  let index = 1;
+
+ 
+
+  if (updateUser.name !== undefined) {
+    fields.push(`name = $${index++}`);
+    values.push(updateUser.name);
+  }
+
+  if (updateUser.email !== undefined) {
+    fields.push(`email = $${index++}`);
+    values.push(updateUser.email);
+  }
+
+  values.push(id);
+
+if (fields.length === 0) {
+  throw new Error("No fields to update");
 }
 
+  const result = await pool.query(
+    `UPDATE users  SET ${fields.join(", ")}, updated_at = NOW() WHERE id = $${index} RETURNING id, name, email, role, created_at, updated_at`,
+    values
+  );
+
+  return result.rows[0];
+};
+
 export const deleteUser = async (id:number): Promise<boolean>  => {
-    const result = await pool.query('DELETE FROM users WHERE id = $1', [id])
+    const result = await pool.query('UPDATE users SET is_active = false , updated_at = NOW() WHERE id = $1', [id])
     return (result.rowCount ?? 0) > 0;
 }
