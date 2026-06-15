@@ -16,13 +16,16 @@ export const register = async (name: string, email: string, password: string) =>
 };
 
 export const login = async (email: string, password: string) => {
+
   const result = await pool.query(
-    "SELECT * FROM users WHERE email = $1 RETURNING id, name, email, role",
+    "SELECT id, name, email, role, password FROM users WHERE email = $1",
     [email]
   );
 
   const user = result.rows[0];
   if (!user) throw new Error("User not found");
+
+  const {name, role} = user
 
   const match = await bcrypt.compare(password, user.password);
   if (!match) throw new Error("Invalid password");
@@ -33,5 +36,5 @@ export const login = async (email: string, password: string) => {
     { expiresIn: "1d" }
   );
 
-  return { token };
+  return { token, email, role, name  };
 };
