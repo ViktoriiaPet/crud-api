@@ -11,7 +11,7 @@ export const getAllUser = async (params: {
   order: "asc" | "desc";
 }): Promise< { data: User[]; total: number; totalPages: number }> => {
 
-    const result = await pool.query('SELECT * FROM users WHERE is_active = true ORDER BY id ASC LIMIT $1 OFFSET $2', [params.limit, params.offset]);
+    const result = await pool.query('SELECT id, name, email, role, created_at, updated_at FROM users WHERE is_active = true ORDER BY id ASC LIMIT $1 OFFSET $2', [params.limit, params.offset]);
     const countResult = await pool.query('SELECT COUNT(*) FROM users')
     const total = parseInt(countResult.rows[0].count, 10);
     const totalPages = Math.ceil(total / params.limit);
@@ -24,14 +24,14 @@ export const getAllUser = async (params: {
 }
 
 export const getUserById = async (id:number) : Promise<User | undefined> => {
-   const result = await pool.query('SELECT * FROM users WHERE is_active = true AND id = $1',
+   const result = await pool.query('SELECT id, name, email, role, created_at, updated_at FROM users WHERE is_active = true AND id = $1',
     [id])
    return result.rows[0];
 }
 
 export const createUser = async (user:User) : Promise<User | undefined> => {
-    console.log("3 service start");
-    const result = await pool.query('INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *', [user.name, user.email, user.password])
+    console.log(user);
+    const result = await pool.query('INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at, updated_at', [user.name, user.email, user.password, user.role])
     return result.rows[0];
 }
 
@@ -62,7 +62,7 @@ if (fields.length === 0) {
 }
 
   const result = await pool.query(
-    `UPDATE users  SET ${fields.join(", ")}, updated_at = NOW() WHERE id = $${index} RETURNING *`,
+    `UPDATE users  SET ${fields.join(", ")}, updated_at = NOW() WHERE id = $${index} RETURNING id, name, email, role, created_at, updated_at`,
     values
   );
 
