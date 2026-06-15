@@ -7,7 +7,7 @@ export const swaggerDocument = {
   },
   servers: [
     {
-      url: "http://localhost:3000",
+      url: "https://crud-api-5ydv.onrender.com/",
     },
   ],
 
