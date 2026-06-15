@@ -214,6 +214,12 @@ export const swaggerDocument = {
                   type: "string",
                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 },
+                email: { type: "string",
+                    example: "John@mail.com" },
+                role: { type: "string",
+                    example: "user" },
+                name: { type: "string",
+                    exapmle: "John" }
               },
             },
           },
