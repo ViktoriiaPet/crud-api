@@ -35,9 +35,12 @@ export const getUser = async (req: Request, res: Response) => {
 }
 
 export const createUser = async (req: Request, res: Response) => {
-    console.log("1 controller start");
     const {name, email, password} = req.body;
-    const user: User = { id: Date.now(), name, email, password };
+    const role = req.user?.role === "admin"
+  ? req.body.role || "user"
+  : "user";
+    const user: User = { id: Date.now(), name, email, password, role
+     };
     const newUser = await userservice.createUser(user)
     return res.status(201).json(newUser)
 }
@@ -55,3 +58,20 @@ export const deleteUser = async (req: Request, res: Response) => {
     if (!succes) res.status(404).json({message: "user not found"})
     return res.status(204).json(succes)
 }
+
+export const getMe = async (req: Request, res: Response) => {
+    console.log("USER FROM TOKEN:", req.user);
+    console.log("ID TYPE:", typeof req.user?.id, req.user?.id);
+const userId = Number(req.user?.id);
+  if (!userId) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+  if (!userId || isNaN(userId)) {
+  return res.status(400).json({ message: "Invalid user id in token" });
+}
+  const user = await userservice.getUserById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  return res.json(user);
+};
