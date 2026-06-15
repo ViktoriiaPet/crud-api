@@ -28,16 +28,6 @@ export const swaggerDocument = {
   ],
 
   paths : {
-    "/health" : {
-        get: {
-            summary : "Health check",
-            responses: {
-                "200": {
-                    description: "Server is running",
-                }
-            }
-        }
-    },
      "/users": {
     get: {
       summary: "Get all users",
