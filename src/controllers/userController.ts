@@ -3,6 +3,7 @@
  import { type User } from '../models/User.js';
  import { paginationEschema } from '../schemas/pagingSchema.js';
 import { number } from 'zod';
+import {pool} from '../config/db.js';
 
 export const getUsers = async (req: Request, res: Response) => {
     const query  = paginationEschema.parse(req.query);
@@ -39,7 +40,7 @@ export const createUser = async (req: Request, res: Response) => {
     const role = req.user?.role === "admin"
   ? req.body.role || "user"
   : "user";
-    const user: User = { id: Date.now(), name, email, password, role
+    const user: User = { id: Date.now(), uuid: crypto.randomUUID(), name, email, password, role
      };
     const newUser = await userservice.createUser(user)
     return res.status(201).json(newUser)
@@ -60,32 +61,31 @@ export const deleteUser = async (req: Request, res: Response) => {
 }
 
 export const getMe = async (req: Request, res: Response) => {
-    console.log("USER FROM TOKEN:", req.user);
-    console.log("ID TYPE:", typeof req.user?.id, req.user?.id);
-const userId = Number(req.user?.id);
-  if (!userId) {
+  const uuid = req.user?.uuid;
+
+  if (!uuid) {
     return res.status(401).json({ message: "Not authenticated" });
   }
-  if (!userId || isNaN(userId)) {
-  return res.status(400).json({ message: "Invalid user id in token" });
-}
-  const user = await userservice.getUserById(userId);
+
+  const user = await userservice.getUserByUuid(uuid);
+
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
+
   return res.json(user);
 };
 
 export const deleteMe = async (req: Request, res: Response) => {
-  const userId = Number(req.user?.id);
+  const uuid = req.user?.uuid;
 
-  if (!userId) {
+  if (!uuid) {
     return res.status(401).json({
       message: "Not authenticated",
     });
   }
 
-  const success = await userservice.deleteUser(userId);
+  const success = await userservice.deleteUserByUuid(uuid);
 
   if (!success) {
     return res.status(404).json({
@@ -95,3 +95,4 @@ export const deleteMe = async (req: Request, res: Response) => {
 
   return res.status(204).send();
 }
+

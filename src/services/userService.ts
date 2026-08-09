@@ -24,10 +24,23 @@ export const getAllUser = async (params: {
 }
 
 export const getUserById = async (id:number) : Promise<User | undefined> => {
-   const result = await pool.query('SELECT id, name, email, role, created_at, updated_at FROM users WHERE is_active = true AND id = $1',
+   const result = await pool.query('SELECT id,uuid, name, email, role, created_at, updated_at FROM users WHERE is_active = true AND id = $1',
     [id])
    return result.rows[0];
 }
+
+export const getUserByUuid = async (
+  uuid: string
+): Promise<User | undefined> => {
+  const result = await pool.query(
+    `SELECT id, uuid, name, email, role, created_at, updated_at
+     FROM users
+     WHERE is_active = true AND uuid = $1`,
+    [uuid]
+  );
+
+  return result.rows[0];
+};
 
 export const createUser = async (user:User) : Promise<User | undefined> => {
     const result = await pool.query('INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at, updated_at', [user.name, user.email, user.password, user.role])
@@ -72,3 +85,14 @@ export const deleteUser = async (id:number): Promise<boolean>  => {
     const result = await pool.query('UPDATE users SET is_active = false , updated_at = NOW() WHERE id = $1', [id])
     return (result.rowCount ?? 0) > 0;
 }
+
+export const deleteUserByUuid = async (uuid: string): Promise<boolean> => {
+  const result = await pool.query(
+    `UPDATE users
+     SET is_active = false, updated_at = NOW()
+     WHERE uuid = $1`,
+    [uuid]
+  );
+
+  return (result.rowCount ?? 0) > 0;
+};
