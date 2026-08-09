@@ -75,3 +75,23 @@ const userId = Number(req.user?.id);
   }
   return res.json(user);
 };
+
+export const deleteMe = async (req: Request, res: Response) => {
+  const userId = Number(req.user?.id);
+
+  if (!userId) {
+    return res.status(401).json({
+      message: "Not authenticated",
+    });
+  }
+
+  const success = await userservice.deleteUser(userId);
+
+  if (!success) {
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
+
+  return res.status(204).send();
+}
