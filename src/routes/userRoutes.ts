@@ -16,4 +16,6 @@ userRouter.get("/:id",validateParam, authMiddleware, userController.getUser)
 userRouter.post("/", validateUser(createUserSchema), authMiddleware, roleMiddleware, userController.createUser)
 userRouter.put("/:id",validateParam, validateUser(updateUserSchema),authMiddleware, ownershipMiddleware, userController.updateUser)
 
+userRouter.delete("/me", authMiddleware, userController.deleteMe);
 userRouter.delete("/:id",validateParam, authMiddleware, roleMiddleware, userController.deleteUser)
+

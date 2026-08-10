@@ -1,9 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
-import type { Jwt } from "jsonwebtoken";
+
 import jwt from "jsonwebtoken";
 
 interface TokenPayload  {
-    "id": number,
+    "id"  : number,
+    "uuid": string,
     "role": string
 }
 
@@ -33,6 +34,7 @@ export const authMiddleware = (req: Request, res:Response, next: NextFunction) :
 
     req.user = {
       id: decoded.id,
+      uuid: decoded.uuid,
       role: decoded.role,
     };
     next();
