@@ -30,7 +30,7 @@ export const isRefreshTokenExpired = (expiresAt: Date) => {
     return new Date(expiresAt).getTime() <= Date.now();
 }
 
-export const deleteRefreshToken = async (token: string) => {
+export const deleteRefreshToken = async (token: string) : Promise<boolean> => {
   const result = await pool.query(
     `DELETE FROM refresh_tokens
      WHERE token = $1`,
@@ -38,6 +38,6 @@ export const deleteRefreshToken = async (token: string) => {
   );
 
   return (result.rowCount ?? 0) > 0;
-};;
+};
 
 export const deleteAllUserRefreshTokens = async (userId:number) => {};

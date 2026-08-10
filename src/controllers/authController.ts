@@ -1,6 +1,6 @@
 import * as authService from "../services/authService.js";
  import { type Request, type Response } from 'express';
-import {refreshToken} from "../services/authService.js"
+import { deleteRefreshToken } from '../services/refreshTokenService.js';
 
 
 export const register = async (req: Request, res: Response) => {
@@ -75,3 +75,23 @@ export const refresh = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.body.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: "Refresh token is required" });
+    } 
+  
+  const success = await deleteRefreshToken(refreshToken);
+
+  if (!success) {
+    return res.status(404).json({ message: "Refresh token not found" });
+  }
+  return res.status(204).send();
+} catch (error) {
+  return res.status(500).json({ message: "Internal server error" });
+}
+
+}
