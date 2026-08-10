@@ -1,9 +1,8 @@
- import express, { type Request, type Response } from 'express';
+ import { type Request, type Response } from 'express';
  import * as userservice from "../services/userService.js"
  import { type User } from '../models/User.js';
  import { paginationEschema } from '../schemas/pagingSchema.js';
-import { number } from 'zod';
-import {pool} from '../config/db.js';
+
 
 export const getUsers = async (req: Request, res: Response) => {
     const query  = paginationEschema.parse(req.query);
