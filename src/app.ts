@@ -5,8 +5,15 @@ import { authRouter } from "./routes/authRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerDocument } from "./docs/swagger.js";
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
+import cors from 'cors'
 
 export const app: Application = express();
+
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+  }),
+)
 
 app.use(express.json())
 app.use(logger)
