@@ -27,12 +27,12 @@ export const login = async (email: string, password: string) => {
   );
 
   const user = result.rows[0];
-  if (!user) throw new Error("User not found");
+  if (!user) throw new Error("Invalid credentials");
 
   const {name, role, uuid} = user
 
   const match = await bcrypt.compare(password, user.password);
-  if (!match) throw new Error("Invalid password");
+  if (!match) throw new Error("Invalid credentials");
 
   const token = jwt.sign(
     { id: user.id, role: user.role, uuid: user.uuid },

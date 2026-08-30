@@ -32,11 +32,24 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  try{
+      const { email, password } = req.body;
 
   const result = await authService.login(email, password);
 
   res.json(result);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Invalid credentials') {
+      return res.status(401).json({
+        message: 'Invalid email or password',
+      })
+    }
+
+    return res.status(500).json({
+      message: 'Internal server error',
+    })
+  
+  }
 };
 
 export const refresh = async (req: Request, res: Response) => {
